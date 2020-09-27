@@ -3,6 +3,7 @@
 package com.github.shynixn.blockball.bukkit.logic.business.service
 
 import com.github.shynixn.blockball.api.business.enumeration.Version
+import com.github.shynixn.blockball.api.business.proxy.BallProxy
 import com.github.shynixn.blockball.api.business.proxy.PluginProxy
 import com.github.shynixn.blockball.api.business.service.ItemTypeService
 import com.github.shynixn.blockball.api.business.service.PackageService
@@ -10,13 +11,22 @@ import com.github.shynixn.blockball.api.business.service.ProxyService
 import com.github.shynixn.blockball.api.persistence.entity.ChatBuilder
 import com.github.shynixn.blockball.api.persistence.entity.Item
 import com.github.shynixn.blockball.api.persistence.entity.Position
+import com.github.shynixn.blockball.bukkit.BlockBallPlugin
 import com.github.shynixn.blockball.bukkit.logic.business.extension.*
+import com.github.shynixn.blockball.core.logic.business.extension.minecraft
+import com.github.shynixn.mccoroutine.asyncDispatcher
+import com.github.shynixn.mccoroutine.launch
+import com.github.shynixn.mccoroutine.launchAsync
+import com.github.shynixn.mccoroutine.minecraftDispatcher
 import com.google.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.Location
 import org.bukkit.block.Sign
 import org.bukkit.command.CommandSender
+import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.Entity
 import org.bukkit.entity.ItemFrame
 import org.bukkit.entity.Player
@@ -27,6 +37,7 @@ import java.util.*
 import java.util.logging.Level
 import java.util.stream.Stream
 import kotlin.collections.ArrayList
+import kotlin.coroutines.CoroutineContext
 import kotlin.streams.asStream
 
 /**
@@ -58,6 +69,7 @@ import kotlin.streams.asStream
  */
 class ProxyServiceImpl @Inject constructor(
     private val pluginProxy: PluginProxy,
+    private val plugin: Plugin,
     private val packageService: PackageService,
     private val itemTypeService: ItemTypeService
 ) : ProxyService {
@@ -98,12 +110,12 @@ class ProxyServiceImpl @Inject constructor(
     /**
      * Gets the player uuid.
      */
-    override fun <P> getPlayerUUID(player: P): String {
+    override fun <P> getPlayerUUID(player: P): UUID {
         if (player !is Player) {
             throw IllegalArgumentException("Player has to be a BukkitPlayer!")
         }
 
-        return player.uniqueId.toString()
+        return player.uniqueId
     }
 
     /**
@@ -137,6 +149,47 @@ class ProxyServiceImpl @Inject constructor(
         get() {
             return GameMode.values().map { g -> g.name }
         }
+
+    override fun setBallId(id: BallProxy) {
+        ProtocolServiceImpl.blockBallId = id.getDesignArmorstand<ArmorStand>().entityId
+    }
+
+    /**
+     * Gets the minecraft dispatcher.
+     */
+    override val minecraftDispatcher: CoroutineContext
+        get() {
+            return plugin.minecraftDispatcher
+        }
+
+    /**
+     * Gets the async dispatcher.
+     */
+    override val asyncDispatcher: CoroutineContext
+        get() {
+            return plugin.asyncDispatcher
+        }
+
+    /**
+     * Gets the player from uuid or null.
+     */
+    override fun <P> getPlayerFromUUID(uuid: UUID): P? {
+        return Bukkit.getPlayer(uuid) as P?
+    }
+
+    /**
+     * Launches the minecraft coroutine scope.
+     */
+    override fun launchMinecraft(f: suspend CoroutineScope.() -> Unit) {
+        plugin.launch(Dispatchers.minecraft, f)
+    }
+
+    /**
+     * Launches the async coroutine scope.
+     */
+    override fun launchAsync(f: suspend CoroutineScope.() -> Unit) {
+        plugin.launchAsync(f)
+    }
 
     /**
      * Teleports the player to the given location.

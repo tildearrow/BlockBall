@@ -122,7 +122,7 @@ class GameHubGameActionServiceImpl @Inject constructor(
      */
     private fun prepareLobbyStorageForPlayer(game: HubGame, player: Any, team: Team, teamMeta: TeamMeta) {
         val uuid = proxyService.getPlayerUUID(player)
-        val stats = GameStorageEntity(UUID.fromString(uuid))
+        val stats = GameStorageEntity(uuid)
         game.ingamePlayersStorage[player] = stats
 
         stats.scoreboard = proxyService.generateNewScoreboard()

@@ -54,7 +54,6 @@ class BlockBallDependencyInjectionBinder(private val plugin: PluginContainer, pr
         // Persistence Services
         bind(PersistenceLinkSignService::class.java).to(PersistenceLinkSignServiceImpl::class.java).`in`(Scopes.SINGLETON)
         bind(PersistenceArenaService::class.java).to(PersistenceArenaServiceImpl::class.java).`in`(Scopes.SINGLETON)
-        bind(PersistenceStatsService::class.java).to(PersistenceStatsServiceImpl::class.java)
 
         // Services
         // TODO: bind(ItemService::class.java).to(ItemServiceImpl::class.java)

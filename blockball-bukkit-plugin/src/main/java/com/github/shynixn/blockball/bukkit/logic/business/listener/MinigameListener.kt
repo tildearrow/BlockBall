@@ -10,8 +10,10 @@ import com.github.shynixn.blockball.api.business.service.GameService
 import com.github.shynixn.blockball.api.persistence.entity.MiniGame
 import com.github.shynixn.blockball.bukkit.logic.business.extension.hasPermission
 import com.google.inject.Inject
+import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import org.bukkit.event.player.AsyncPlayerChatEvent
 import org.bukkit.event.player.PlayerCommandPreprocessEvent
 import org.bukkit.event.player.PlayerInteractEvent
 
@@ -47,6 +49,16 @@ class MinigameListener @Inject constructor(
     private val miniGameActionService: GameMiniGameActionService,
     private val configurationService: ConfigurationService
 ) : Listener {
+
+    /**
+     * Loads the stats when the player joins the server.
+     *
+     * @param event event.
+     */
+    @EventHandler
+    fun onPlayerChatEvent(event: AsyncPlayerChatEvent) {
+        println("NCHAT" + Bukkit.isPrimaryThread())
+    }
 
     /**
      * Cancels actions in minigame and bungeecord games to restrict destroying the arena.

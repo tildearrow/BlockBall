@@ -85,8 +85,8 @@ class GameMiniGameActionServiceImpl @Inject constructor(
                     )
                 )
                 .setClickAction(
-                    ChatClickAction.RUN_COMMAND
-                    , "/" + configurationService.findValue<String>("global-spectate.command") + " " + game.arena.name
+                    ChatClickAction.RUN_COMMAND,
+                    "/" + configurationService.findValue<String>("global-spectate.command") + " " + game.arena.name
                 )
                 .setHoverText(" ")
                 .builder()
@@ -389,7 +389,7 @@ class GameMiniGameActionServiceImpl @Inject constructor(
     }
 
     private fun createPlayerStorage(game: MiniGame, player: Any): GameStorage {
-        val stats = GameStorageEntity(UUID.fromString(proxyService.getPlayerUUID(player)))
+        val stats = GameStorageEntity(proxyService.getPlayerUUID(player))
         stats.gameMode = proxyService.getPlayerGameMode(player)
         stats.armorContents = proxyService.getPlayerInventoryArmorCopy(player)
         stats.inventoryContents = proxyService.getPlayerInventoryCopy(player)

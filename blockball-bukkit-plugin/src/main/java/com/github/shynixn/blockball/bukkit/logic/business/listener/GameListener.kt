@@ -5,6 +5,7 @@ import com.github.shynixn.blockball.api.bukkit.event.BallPostMoveEvent
 import com.github.shynixn.blockball.api.business.enumeration.Permission
 import com.github.shynixn.blockball.api.business.enumeration.Team
 import com.github.shynixn.blockball.api.business.service.*
+import com.github.shynixn.blockball.bukkit.BlockBallPlugin
 import com.github.shynixn.blockball.bukkit.logic.business.extension.hasPermission
 import com.github.shynixn.blockball.bukkit.logic.business.extension.toLocation
 import com.github.shynixn.blockball.bukkit.logic.business.extension.toPosition
@@ -77,6 +78,7 @@ class GameListener @Inject constructor(
         }
 
         rightClickManageService.cleanResources(event.player)
+        BlockBallPlugin.protocolService!!.unRegisterPlayer(event.player)
     }
 
     /**

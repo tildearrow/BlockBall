@@ -3,9 +3,11 @@ package com.github.shynixn.blockball.bukkit.logic.business.service
 import com.github.shynixn.blockball.api.business.enumeration.PlaceHolder
 import com.github.shynixn.blockball.api.business.service.DependencyPlaceholderApiService
 import com.github.shynixn.blockball.api.business.service.GameService
-import com.github.shynixn.blockball.api.business.service.PersistenceStatsService
 import com.github.shynixn.blockball.api.business.service.PlaceholderService
+import com.github.shynixn.blockball.api.business.service.StatsCacheService
+import com.github.shynixn.blockball.core.logic.business.extension.launch
 import com.google.inject.Inject
+import kotlinx.coroutines.Dispatchers
 import me.clip.placeholderapi.expansion.PlaceholderExpansion
 import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
@@ -41,7 +43,7 @@ class DependencyPlaceholderApiServiceImpl @Inject constructor(
     private val plugin: Plugin,
     private val gameService: GameService,
     private val placeHolderService: PlaceholderService,
-    private val persistenceStatsService: PersistenceStatsService
+    private val statsCacheService: StatsCacheService
 ) : PlaceholderExpansion(),
     DependencyPlaceholderApiService {
     private var registerd: Boolean = false
@@ -85,18 +87,35 @@ class DependencyPlaceholderApiServiceImpl @Inject constructor(
      * @return result
      */
     override fun onPlaceholderRequest(player: Player?, s: String?): String? {
+        var result: String? = null
+
+        launch(Dispatchers.Unconfined) {
+            result = getPlayerHolder(player, s)
+        }
+
+        return result
+    }
+
+    private suspend fun getPlayerHolder(player: Player?, s: String?): String? {
         try {
-            PlaceHolder.values().asSequence().filter { p -> s != null && s.startsWith(p.placeHolder) }.forEach { p ->
+            val placeHolderSequence =
+                PlaceHolder.values().asSequence().filter { p -> s != null && s.startsWith(p.placeHolder) }
+            val stats = statsCacheService.getStatsFromPlayer(player!!)
+
+            for (p in placeHolderSequence) {
                 if (p == PlaceHolder.STATS_WINRATE) {
-                    return String.format("%.2f", persistenceStatsService.getStatsFromPlayer(player!!).winRate)
+                    return String.format("%.2f", stats.winRate)
                 } else if (p == PlaceHolder.STATS_PLAYEDGAMES) {
-                    return persistenceStatsService.getStatsFromPlayer(player!!).amountOfPlayedGames.toString()
+                    return stats.amountOfPlayedGames.toString()
                 } else if (p == PlaceHolder.STATS_GOALS_PER_GAME) {
-                    return String.format("%.2f", persistenceStatsService.getStatsFromPlayer(player!!).goalsPerGame)
+                    return String.format(
+                        "%.2f",
+                        stats.goalsPerGame
+                    )
                 } else if (p == PlaceHolder.STATS_GOALS_AMOUNT) {
-                    return persistenceStatsService.getStatsFromPlayer(player!!).amountOfGoals.toString()
+                    return stats.amountOfGoals.toString()
                 } else if (p == PlaceHolder.STATS_WINS_AMOUNT) {
-                    return persistenceStatsService.getStatsFromPlayer(player!!).amountOfWins.toString()
+                    return stats.amountOfWins.toString()
                 } else {
                     val data = s!!.split("_")
                     val game = gameService.getGameFromName(data[1])

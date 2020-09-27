@@ -8,7 +8,7 @@ tasks.withType<ShadowJar> {
     archiveName = "$baseName-$version.$extension"
 
     // Change the output folder of the plugin.
-    // destinationDir = File("D:\\Benutzer\\Temp\\plugins")
+    destinationDir = File("D:\\Benutzer\\Temp\\plugins")
 
     relocate("kotlin", "com.github.shynixn.blockball.lib.kotlin")
 
@@ -61,6 +61,10 @@ dependencies {
     implementation(project(":blockball-bukkit-plugin:blockball-bukkit-nms-116R1"))
     implementation(project(":blockball-bukkit-plugin:blockball-bukkit-nms-116R2"))
 
+    implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:0.0.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.3.72")
+
     implementation("org.slf4j:slf4j-jdk14:1.7.25")
     implementation("com.zaxxer:HikariCP:3.2.0")
     implementation("com.google.inject:guice:4.1.0")
@@ -70,7 +74,7 @@ dependencies {
 
     compileOnly("me.clip:placeholderapi:2.9.2")
     compileOnly("net.milkbowlvault:VaultAPI:1.7")
-    compileOnly("org.spigotmc:spigot114R1:1.14.4-R1.0")
+    compileOnly("org.spigotmc:spigot116R2:1.16.2-R2.0")
 
     testCompile("org.xerial:sqlite-jdbc:3.23.1")
     testCompile("ch.vorburger.mariaDB4j:mariaDB4j:2.2.3")

@@ -1,9 +1,13 @@
 package com.github.shynixn.blockball.api.business.service
 
 import com.github.shynixn.blockball.api.business.enumeration.GameMode
+import com.github.shynixn.blockball.api.business.proxy.BallProxy
 import com.github.shynixn.blockball.api.persistence.entity.ChatBuilder
 import com.github.shynixn.blockball.api.persistence.entity.Position
+import kotlinx.coroutines.CoroutineScope
+import java.util.*
 import java.util.stream.Stream
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Created by Shynixn 2019.
@@ -37,6 +41,33 @@ interface ProxyService {
      * Gets all available gamemodes.
      */
     val gameModes: List<String>
+
+    fun setBallId(id : BallProxy)
+
+    /**
+     * Gets the minecraft dispatcher.
+     */
+    val minecraftDispatcher: CoroutineContext
+
+    /**
+     * Gets the async dispatcher.
+     */
+    val asyncDispatcher: CoroutineContext
+
+    /**
+     * Gets the player from uuid or null.
+     */
+    fun <P> getPlayerFromUUID(uuid: UUID): P?
+
+    /**
+     * Launches the minecraft coroutine scope.
+     */
+    fun launchMinecraft(f: suspend CoroutineScope.() -> Unit)
+
+    /**
+     * Launches the async coroutine scope.
+     */
+    fun launchAsync(f: suspend CoroutineScope.() -> Unit)
 
     /**
      * Teleports the player to the given location.
@@ -81,7 +112,7 @@ interface ProxyService {
     /**
      * Gets the player uuid.
      */
-    fun <P> getPlayerUUID(player: P): String
+    fun <P> getPlayerUUID(player: P): UUID
 
     /**
      * Sets the location of the player.

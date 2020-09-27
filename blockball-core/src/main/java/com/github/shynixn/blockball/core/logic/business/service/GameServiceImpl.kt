@@ -100,6 +100,8 @@ class GameServiceImpl @Inject constructor(
             if (game.closed) {
                 if (game !is BungeeCordGame) {
                     games.remove(game)
+
+                    // Take new arena. TODO
                     initGame(game.arena)
                 }
             } else {

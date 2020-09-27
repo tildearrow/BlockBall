@@ -116,6 +116,8 @@ class GameSoccerServiceImpl @Inject constructor(
             return
         }
 
+        proxyService.setBallId(game.ball!!)
+
         val ballPosition = proxyService.toPosition(game.ball!!.getLocation<Any>())
         var isBallInRedGoal =
             game.arena.meta.redTeamMeta.goal.isLocationInSelection(ballPosition)

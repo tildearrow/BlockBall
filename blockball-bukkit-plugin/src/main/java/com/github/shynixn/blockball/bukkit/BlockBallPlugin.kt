@@ -12,10 +12,14 @@ import com.github.shynixn.blockball.api.persistence.context.SqlDbContext
 import com.github.shynixn.blockball.core.logic.business.extension.translateChatColors
 import com.github.shynixn.blockball.bukkit.logic.business.extension.findClazz
 import com.github.shynixn.blockball.bukkit.logic.business.listener.*
+import com.github.shynixn.blockball.bukkit.logic.business.service.ProtocolServiceImpl
 import com.github.shynixn.blockball.core.logic.business.commandexecutor.*
 import com.github.shynixn.blockball.core.logic.business.extension.cast
+import com.github.shynixn.mccoroutine.launch
+import com.github.shynixn.mccoroutine.registerSuspendingEvents
 import com.google.inject.Guice
 import com.google.inject.Injector
+import kotlinx.coroutines.runBlocking
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.IOUtils
 import org.bstats.bukkit.Metrics
@@ -60,11 +64,13 @@ class BlockBallPlugin : JavaPlugin(), PluginProxy {
     companion object {
         /** Final Prefix of BlockBall in the console */
         val PREFIX_CONSOLE: String = ChatColor.BLUE.toString() + "[BlockBall] "
+        var protocolService: ProtocolServiceImpl? = null
     }
 
     private var injector: Injector? = null
     private var serverVersion: Version? = null
     private val bstatsPluginId = 1317
+
 
     /**
      * Gets the installed version of the plugin.
@@ -131,6 +137,10 @@ class BlockBallPlugin : JavaPlugin(), PluginProxy {
         }
 
         this.injector = Guice.createInjector(BlockBallDependencyInjectionBinder(this))
+        val method = BlockBallApi::class.java.getDeclaredMethod("initializeBlockBall", PluginProxy::class.java)
+        method.isAccessible = true
+        method.invoke(BlockBallApi, this)
+
         this.reloadConfig()
 
         // Register Listeners
@@ -139,7 +149,7 @@ class BlockBallPlugin : JavaPlugin(), PluginProxy {
         Bukkit.getPluginManager().registerEvents(resolve(HubgameListener::class.java), this)
         Bukkit.getPluginManager().registerEvents(resolve(MinigameListener::class.java), this)
         Bukkit.getPluginManager().registerEvents(resolve(BungeeCordgameListener::class.java), this)
-        Bukkit.getPluginManager().registerEvents(resolve(StatsListener::class.java), this)
+        Bukkit.getPluginManager().registerSuspendingEvents(resolve(StatsListener::class.java), this)
         Bukkit.getPluginManager().registerEvents(resolve(BallListener::class.java), this)
         Bukkit.getPluginManager().registerEvents(resolve(BlockSelectionListener::class.java), this)
 
@@ -203,6 +213,8 @@ class BlockBallPlugin : JavaPlugin(), PluginProxy {
 
         Bukkit.getServer()
             .consoleSender.sendMessage(PREFIX_CONSOLE + ChatColor.GREEN + "Enabled BlockBall " + this.description.version + " by Shynixn, LazoYoung")
+
+        protocolService = ProtocolServiceImpl()
     }
 
     /**
@@ -213,7 +225,12 @@ class BlockBallPlugin : JavaPlugin(), PluginProxy {
             return
         }
 
-        resolve(PersistenceStatsService::class.java).close()
+        protocolService!!.close()
+
+        runBlocking {
+            resolve(StatsCacheService::class.java).closeAndSave()
+        }
+
         resolve(SqlDbContext::class.java).close()
 
         try {
@@ -251,10 +268,6 @@ class BlockBallPlugin : JavaPlugin(), PluginProxy {
         try {
             val gameService = resolve(GameService::class.java)
             gameService.restartGames()
-
-            val method = BlockBallApi::class.java.getDeclaredMethod("initializeBlockBall", PluginProxy::class.java)
-            method.isAccessible = true
-            method.invoke(BlockBallApi, this)
             logger.log(Level.INFO, "Using NMS Connector " + getServerVersion().bukkitId + ".")
         } catch (e: Exception) {
             logger.log(Level.WARNING, "Failed to enable BlockBall.", e)

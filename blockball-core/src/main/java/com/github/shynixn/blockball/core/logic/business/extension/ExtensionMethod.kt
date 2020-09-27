@@ -7,7 +7,11 @@ import com.github.shynixn.blockball.api.business.enumeration.ChatColor
 import com.github.shynixn.blockball.api.business.executor.CommandExecutor
 import com.github.shynixn.blockball.api.business.service.ConcurrencyService
 import com.github.shynixn.blockball.api.business.service.LoggingService
+import com.github.shynixn.blockball.api.business.service.ProxyService
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import java.util.concurrent.CompletableFuture
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Created by Shynixn 2019.
@@ -118,3 +122,36 @@ inline fun async(
         f.invoke()
     }
 }
+
+/**
+ * Launches the minecraft coroutine scope.
+ */
+fun launch(dispatcher: CoroutineContext = Dispatchers.minecraft, f: suspend CoroutineScope.() -> Unit) {
+    BlockBallApi.resolve(ProxyService::class.java).launchMinecraft(f)
+}
+
+
+/**
+ * Launches the async coroutine scope.
+ */
+fun launchAsync(f: suspend CoroutineScope.() -> Unit) {
+    BlockBallApi.resolve(ProxyService::class.java).launchAsync(f)
+}
+
+/**
+ * Minecraft main thread dispatcher.
+ */
+val Dispatchers.minecraft: CoroutineContext
+    get() {
+        return BlockBallApi.resolve(ProxyService::class.java).minecraftDispatcher
+    }
+
+/**
+ * Minecraft async thread dispatcher.
+ */
+val Dispatchers.async: CoroutineContext
+    get() {
+        return BlockBallApi.resolve(ProxyService::class.java).asyncDispatcher
+    }
+
+

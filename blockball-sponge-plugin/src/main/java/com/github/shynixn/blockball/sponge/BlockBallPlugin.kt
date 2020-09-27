@@ -10,6 +10,7 @@ import com.github.shynixn.blockball.api.business.service.*
 import com.github.shynixn.blockball.core.logic.business.commandexecutor.*
 import com.github.shynixn.blockball.sponge.logic.business.dependency.Metrics2
 import com.github.shynixn.blockball.sponge.logic.business.extension.sendMessage
+import com.google.inject.Guice
 import com.google.inject.Inject
 import com.google.inject.Injector
 import org.slf4j.Logger

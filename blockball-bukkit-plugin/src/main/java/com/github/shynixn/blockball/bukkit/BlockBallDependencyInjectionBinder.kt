@@ -113,7 +113,7 @@ class BlockBallDependencyInjectionBinder(private val plugin: BlockBallPlugin) : 
         bind(PersistenceLinkSignService::class.java).to(PersistenceLinkSignServiceImpl::class.java)
             .`in`(Scopes.SINGLETON)
         bind(PersistenceArenaService::class.java).to(PersistenceArenaServiceImpl::class.java).`in`(Scopes.SINGLETON)
-        bind(PersistenceStatsService::class.java).to(PersistenceStatsServiceImpl::class.java).`in`(Scopes.SINGLETON)
+        bind(StatsCacheService::class.java).to(StatsCacheServiceImpl::class.java).`in`(Scopes.SINGLETON)
         bind(DependencyBossBarApiService::class.java).to(DependencyBossBarApiServiceImpl::class.java)
             .`in`(Scopes.SINGLETON)
         bind(DependencyService::class.java).to(DependencyServiceImpl::class.java).`in`(Scopes.SINGLETON)
