@@ -224,7 +224,7 @@ class BlockBallPlugin : JavaPlugin(), PluginProxy {
         val field = findClazz("net.minecraft.server.VERSION.Entity").getDeclaredField("entityCount")
         field.isAccessible = true
         val integer = field.get(null) as AtomicInteger
-        slime = PacketSlime(integer.incrementAndGet(), player!!.location.toPosition())
+        slime = PacketSlime(integer.incrementAndGet(), player!!.location.add(0.0, 2.0, 0.0).toPosition())
 
 
         protocolService = ProtocolServiceImpl()

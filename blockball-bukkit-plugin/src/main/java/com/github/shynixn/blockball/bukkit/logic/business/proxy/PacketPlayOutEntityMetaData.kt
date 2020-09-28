@@ -74,6 +74,10 @@ class PacketPlayOutEntityMetaData(private val entityId: Int, initializer: Packet
             buffer.writeId(slimeSize!!)
         }
 
+        buffer.writeByte(4)
+        buffer.writeId(booleanTypeValue)
+        buffer.writeBoolean(false)
+
         buffer.writeByte(255)
         return Pair(clazz, buffer)
     }

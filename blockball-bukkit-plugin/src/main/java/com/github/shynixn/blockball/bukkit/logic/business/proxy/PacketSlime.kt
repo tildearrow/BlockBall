@@ -60,11 +60,21 @@ class PacketSlime(
     private suspend fun tick() {
         while (!dead.get()) {
             val players = playerTracker.checkAndGet()
+            val currentPosition = position.clone()
+            val newPosition = PositionEntity(
+                currentPosition.worldName!!,
+                currentPosition.x + 0.1,
+                currentPosition.y,
+                currentPosition.z
+            )
 
             for (player in players) {
-                val buffer = PacketPlayOutEntityTeleport(entityId, position, isOnGround).toByteBuffer()
-                player.sendPacket(JavaPlugin.getPlugin(BlockBallPlugin::class.java), buffer.first, buffer.second)
+             //   val buffer = PacketPlayOutEntityMove(entityId, currentPosition, newPosition, true).toByteBuffer()
+             //   player.sendPacket(JavaPlugin.getPlugin(BlockBallPlugin::class.java), buffer.first, buffer.second)
             }
+
+
+            position = currentPosition
 
             delay(50)
         }
