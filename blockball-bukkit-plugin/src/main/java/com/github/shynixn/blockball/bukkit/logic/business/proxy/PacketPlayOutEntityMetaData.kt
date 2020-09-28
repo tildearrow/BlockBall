@@ -15,6 +15,9 @@ import io.netty.buffer.Unpooled
  */
 class PacketPlayOutEntityMetaData(private val entityId: Int, initializer: PacketPlayOutEntityMetaData.() -> Unit) {
     companion object {
+        // https://wiki.vg/Entity_metadata#Entity_Metadata_Format -> Value of Type field. Type of Value = Boolean -> 7.
+        private val booleanTypeValue = 7
+        private val optChatType = 5
         private val clazz = findClazz("net.minecraft.server.VERSION.PacketPlayOutEntityMetadata")
     }
 
@@ -43,17 +46,17 @@ class PacketPlayOutEntityMetaData(private val entityId: Int, initializer: Packet
         buffer.writeId(this.entityId)
 
         if (customNameVisible != null) {
+            // https://wiki.vg/Entity_metadata#Entity_Metadata_Format -> Index.
             buffer.writeByte(3)
-            buffer.writeId(7)
+            buffer.writeId(booleanTypeValue)
             buffer.writeBoolean(customNameVisible!!)
         }
 
         if (customname != null) {
             val text = "{\"text\": \"$customname\"}"
             val byteText = text.toByteArray()
-
             buffer.writeByte(2)
-            buffer.writeId(5)
+            buffer.writeId(optChatType)
             buffer.writeBoolean(true)
             buffer.writeId(byteText.size)
             buffer.writeBytes(byteText)
