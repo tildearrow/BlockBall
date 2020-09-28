@@ -77,35 +77,11 @@ class PacketSlime(
     }
 
     private fun sendNBTPacket(player: Player) {
-        val customNameVisibleDataWatcherObject = Entity::class.java.getDeclaredField("ar")
-            .accessible(true)
-            .get(null) as DataWatcherObject<Boolean>
-        val customNameDataWatcherObject = Entity::class.java.getDeclaredField("aq")
-            .accessible(true)
-            .get(null) as DataWatcherObject<Optional<IChatBaseComponent>>
-        val chatComponent = IChatBaseComponent.ChatSerializer.a("{\"text\": \"Hello\"}")!! as IChatBaseComponent
-
-        val nativePacket = PacketPlayOutEntityMetadata()
-        val aField = PacketPlayOutEntityMetadata::class.java.getDeclaredField("a")
-        aField.isAccessible = true
-        aField.set(nativePacket, entityId)
-        val bField = PacketPlayOutEntityMetadata::class.java.getDeclaredField("b")
-        bField.isAccessible = true
-        bField.set(
-            nativePacket, listOf(
-                DataWatcher.Item(customNameVisibleDataWatcherObject, true),
-                DataWatcher.Item(
-                    customNameDataWatcherObject, Optional.of(chatComponent)
-                )
-            )
-        )
-
-        player.sendPacket(
-            JavaPlugin.getPlugin(BlockBallPlugin::class.java), nativePacket
-        )
-
-        /*  val buffer = PacketPlayOutEntityMetaData(entityId, hashMapOf("Size" to 3)).toByteBuffer()
-          player.sendPacket(JavaPlugin.getPlugin(BlockBallPlugin::class.java), buffer.first, buffer.second)*/
+        val buffer = PacketPlayOutEntityMetaData(entityId) {
+            this.customNameVisible = true
+            this.customname = "Hello World!"
+        }.toByteBuffer()
+        player.sendPacket(JavaPlugin.getPlugin(BlockBallPlugin::class.java), buffer.first, buffer.second)
     }
 
     private fun sendSpawnPacket(player: Player) {
