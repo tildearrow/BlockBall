@@ -6,7 +6,9 @@ import com.github.shynixn.blockball.api.BlockBallApi
 import com.github.shynixn.blockball.api.business.enumeration.Permission
 import com.github.shynixn.blockball.api.business.proxy.PluginProxy
 import com.github.shynixn.blockball.api.persistence.entity.Position
+import com.github.shynixn.blockball.bukkit.logic.business.proxy.DataWatcherSerializer
 import com.github.shynixn.blockball.core.logic.persistence.entity.PositionEntity
+import io.netty.buffer.ByteBuf
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
@@ -44,6 +46,29 @@ import org.bukkit.util.Vector
  */
 internal fun Permission.hasPermission(player: Player): Boolean {
     return player.hasPermission(this.permission)
+}
+
+fun ByteBuf.writeId(id: Int) {
+    var i = id
+    while (i and -128 != 0) {
+        this.writeByte(i and 127 or 128)
+        i = i ushr 7
+    }
+    this.writeByte(i)
+}
+
+private val dataWatcherSerializer = DataWatcherSerializer()
+
+fun ByteBuf.writeNBT(nbt: Map<String, Any>) {
+    dataWatcherSerializer.serializeNBTToByteBuf(this, nbt)
+}
+
+fun mathhelperA(var0: Double, var2: Double, var4: Double): Double {
+    return if (var0 < var2) {
+        var2
+    } else {
+        if (var0 > var4) var4 else var0
+    }
 }
 
 /**

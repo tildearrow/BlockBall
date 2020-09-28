@@ -43,15 +43,21 @@ enum class EntityType(
     /**
      * SaveGame id from 1.11.0 to 1.13.0.
      */
-    val saveGame_11: String) {
+    val saveGame_11: String,
+
+    /**
+     * Packetslime id.
+     */
+    val packetSlimeId: Int
+) {
 
     /**
      * Armorstand EntityType.
      */
-    ARMORSTAND(30, "ARMORSTAND", "ArmorStand", "armor_stand"),
+    ARMORSTAND(30, "ARMORSTAND", "ArmorStand", "armor_stand", 0),
 
     /**
      * Slime entity type.
      */
-    SLIME(55, "SLIME", "Slime", "slime")
+    SLIME(55, "SLIME", "Slime", "slime", 75)
 }

@@ -11,7 +11,9 @@ import com.github.shynixn.blockball.api.business.service.*
 import com.github.shynixn.blockball.api.persistence.context.SqlDbContext
 import com.github.shynixn.blockball.core.logic.business.extension.translateChatColors
 import com.github.shynixn.blockball.bukkit.logic.business.extension.findClazz
+import com.github.shynixn.blockball.bukkit.logic.business.extension.toPosition
 import com.github.shynixn.blockball.bukkit.logic.business.listener.*
+import com.github.shynixn.blockball.bukkit.logic.business.proxy.PacketSlime
 import com.github.shynixn.blockball.bukkit.logic.business.service.ProtocolServiceImpl
 import com.github.shynixn.blockball.core.logic.business.commandexecutor.*
 import com.github.shynixn.blockball.core.logic.business.extension.cast
@@ -20,6 +22,7 @@ import com.github.shynixn.mccoroutine.registerSuspendingEvents
 import com.google.inject.Guice
 import com.google.inject.Injector
 import kotlinx.coroutines.runBlocking
+import net.minecraft.server.v1_16_R2.Entity
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.IOUtils
 import org.bstats.bukkit.Metrics
@@ -31,6 +34,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.logging.Level
 
 /**
@@ -79,6 +83,8 @@ class BlockBallPlugin : JavaPlugin(), PluginProxy {
         get() {
             return description.version
         }
+
+    var slime: PacketSlime? = null
 
     /**
      * Enables the plugin BlockBall.
@@ -214,6 +220,13 @@ class BlockBallPlugin : JavaPlugin(), PluginProxy {
         Bukkit.getServer()
             .consoleSender.sendMessage(PREFIX_CONSOLE + ChatColor.GREEN + "Enabled BlockBall " + this.description.version + " by Shynixn, LazoYoung")
 
+        val player = Bukkit.getPlayer("Shynixn")
+        val field = findClazz("net.minecraft.server.VERSION.Entity").getDeclaredField("entityCount")
+        field.isAccessible = true
+        val integer = field.get(null) as AtomicInteger
+        slime = PacketSlime(integer.incrementAndGet(), player!!.location.toPosition())
+
+
         protocolService = ProtocolServiceImpl()
     }
 
@@ -224,6 +237,8 @@ class BlockBallPlugin : JavaPlugin(), PluginProxy {
         if (injector == null) {
             return
         }
+
+        slime?.remove()
 
         protocolService!!.close()
 
