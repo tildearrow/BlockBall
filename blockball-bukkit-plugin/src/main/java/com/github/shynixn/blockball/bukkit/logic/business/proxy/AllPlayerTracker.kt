@@ -25,12 +25,14 @@ class AllPlayerTracker(
             for (player in players) {
                 if (!cache.contains(player)) {
                     newPlayerFunction.invoke(player)
+                    cache.add(player)
                 }
             }
 
-            for (player in cache) {
+            for (player in cache.toTypedArray()) {
                 if (!players.contains(player)) {
                     oldPlayerFunction.invoke(player)
+                    cache.remove(player)
                 }
             }
 

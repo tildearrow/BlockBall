@@ -2,22 +2,20 @@ package com.github.shynixn.blockball.bukkit.logic.business.proxy
 
 import com.github.shynixn.blockball.bukkit.logic.business.extension.findClazz
 import com.github.shynixn.blockball.bukkit.logic.business.extension.writeId
-import com.github.shynixn.blockball.bukkit.logic.business.extension.writeNBT
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
+import net.minecraft.server.v1_16_R2.DataWatcher
+import net.minecraft.server.v1_16_R2.DataWatcherRegistry
+import net.minecraft.server.v1_16_R2.EntitySlime
+import net.minecraft.server.v1_16_R2.PacketDataSerializer
 
-class PacketPlayOutEntityMetaData(private val entityId: Int) {
+class PacketPlayOutEntityMetaData
+/**
+ * Initialize.
+ */(private val entityId: Int, private var nbt: Map<String, Any>? = null) {
     companion object {
+        val dataWatcher = DataWatcher.a(EntitySlime::class.java, DataWatcherRegistry.b)
         private val clazz = findClazz("net.minecraft.server.VERSION.PacketPlayOutEntityMetadata")
-    }
-
-    private val nbt: Map<String, Any>? = null
-
-    /**
-     * Initialize.
-     */
-    constructor(f: PacketPlayOutEntityMetaData.() -> Unit) {
-        f.invoke(this)
     }
 
     /**
@@ -27,14 +25,19 @@ class PacketPlayOutEntityMetaData(private val entityId: Int) {
         val buffer = Unpooled.buffer()
         buffer.writeId(this.entityId)
 
+        val dataWatcherSerializer = DataWatcherRegistry.b
+        // var 0 ist der index des wertes.
+        val dataWacherItem = DataWatcher.Item(dataWatcher, 3)
+
         if (nbt != null) {
-            buffer.writeByte(14)
-            // Registry ID aufrufen  public static DataWatcherSerializer<?> a(int var0) {
-            buffer.writeId(14)
-            buffer.writeNBT(nbt)
+            buffer.writeByte(dataWacherItem.a().a())
+            // Könnte man cachen.
+            val id = DataWatcherRegistry.b(dataWacherItem.a().b())
+            buffer.writeId(id)
+            buffer.writeInt(3)
+            buffer.writeByte(255)
         }
 
-        buffer.writeByte(255)
         return Pair(clazz, buffer)
     }
 }

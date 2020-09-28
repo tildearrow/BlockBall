@@ -13,6 +13,7 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.bukkit.util.Vector
+import java.lang.reflect.Field
 
 /**
  * Created by Shynixn 2018.
@@ -55,6 +56,11 @@ fun ByteBuf.writeId(id: Int) {
         i = i ushr 7
     }
     this.writeByte(i)
+}
+
+fun Field.accessible(flag: Boolean): Field {
+    this.isAccessible = flag
+    return this
 }
 
 private val dataWatcherSerializer = DataWatcherSerializer()
