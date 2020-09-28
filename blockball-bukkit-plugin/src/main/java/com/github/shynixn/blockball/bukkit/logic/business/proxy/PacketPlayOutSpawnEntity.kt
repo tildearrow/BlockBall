@@ -32,7 +32,7 @@ class PacketPlayOutSpawnEntity(
         buffer.writeId(this.entityId)
         buffer.writeLong(entityUUID.mostSignificantBits)
         buffer.writeLong(entityUUID.leastSignificantBits)
-        buffer.writeId(EntityType.SLIME.packetSlimeId)
+        buffer.writeId(IRegistry.ENTITY_TYPE.a(EntityTypes.PIG))
         buffer.writeDouble(this.position.x)
         buffer.writeDouble(this.position.y)
         buffer.writeDouble(this.position.z)
