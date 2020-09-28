@@ -17,6 +17,7 @@ class PacketPlayOutEntityMetaData(private val entityId: Int, initializer: Packet
     companion object {
         // https://wiki.vg/Entity_metadata#Entity_Metadata_Format -> Value of Type field. Type of Value = Boolean -> 7.
         private val booleanTypeValue = 7
+        private val intTypeValue = 1
         private val optChatType = 5
         private val clazz = findClazz("net.minecraft.server.VERSION.PacketPlayOutEntityMetadata")
     }
@@ -30,6 +31,11 @@ class PacketPlayOutEntityMetaData(private val entityId: Int, initializer: Packet
      * Sets the custom name.
      */
     var customname: String? = null
+
+    /**
+     * Slime size.
+     */
+    var slimeSize: Int? = null
 
     /**
      * Initializer.
@@ -60,6 +66,12 @@ class PacketPlayOutEntityMetaData(private val entityId: Int, initializer: Packet
             buffer.writeBoolean(true)
             buffer.writeId(byteText.size)
             buffer.writeBytes(byteText)
+        }
+
+        if (slimeSize != null) {
+            buffer.writeByte(15)
+            buffer.writeId(intTypeValue)
+            buffer.writeId(slimeSize!!)
         }
 
         buffer.writeByte(255)

@@ -72,14 +72,11 @@ class PacketSlime(
         playerTracker.dispose()
     }
 
-    companion object {
-        val customNameVisible = DataWatcher.a(EntitySlime::class.java, DataWatcherRegistry.a)
-    }
-
     private fun sendNBTPacket(player: Player) {
         val buffer = PacketPlayOutEntityMetaData(entityId) {
             this.customNameVisible = true
             this.customname = "Hello World!"
+            this.slimeSize = 3
         }.toByteBuffer()
         player.sendPacket(JavaPlugin.getPlugin(BlockBallPlugin::class.java), buffer.first, buffer.second)
     }
