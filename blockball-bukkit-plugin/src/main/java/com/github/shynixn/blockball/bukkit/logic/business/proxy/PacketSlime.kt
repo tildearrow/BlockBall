@@ -23,7 +23,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 class PacketSlime(
     val entityId: Int,
     private var internalPosition: Position,
-    var motion: Position = PositionEntity("world", 0.0, 0.0, 0.0),
     var isOnGround: Boolean = true
 ) {
     private var dead = AtomicBoolean(false)
@@ -56,6 +55,10 @@ class PacketSlime(
             }
         }
 
+
+    var motion: Position = PositionEntity("world", 0.0, 0.0, 0.0)
+
+
     fun remove() {
         dead.set(true)
     }
@@ -69,13 +72,37 @@ class PacketSlime(
             val players = playerTracker.checkAndGet()
 
             for (player in players) {
-                sendGravity(player)
+                sendVelocity(player)
             }
 
             delay(50)
         }
 
         playerTracker.dispose()
+    }
+
+    private fun sendVelocity(player: Player) {
+        val velocity = this.motion
+        val position = this.position
+
+        if (velocity.x == 0.0 && velocity.y == 0.0 && velocity.z == 0.0) {
+            return
+        }
+
+        val newPosition = PositionEntity(
+            this.position.worldName!!,
+            this.position.x + velocity.x,
+            this.position.y + velocity.y,
+            this.position.z + velocity.z
+        )
+
+        val velocityPacket = PacketPlayOutEntityVelocity(entityId, Vec3D(velocity.x, velocity.y, velocity.z))
+        player.sendPacket(JavaPlugin.getPlugin(BlockBallPlugin::class.java), velocityPacket)
+
+        val movePacket = PacketPlayOutEntityMove(entityId, position, newPosition, false).toByteBuffer()
+        player.sendPacket(JavaPlugin.getPlugin(BlockBallPlugin::class.java), movePacket.first, movePacket.second)
+
+        motion = PositionEntity(this.position.worldName!!, 0.0, 0.0, 0.0)
     }
 
     private fun sendGravity(player: Player) {

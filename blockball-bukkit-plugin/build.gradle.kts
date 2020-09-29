@@ -61,7 +61,7 @@ dependencies {
     implementation(project(":blockball-bukkit-plugin:blockball-bukkit-nms-116R1"))
     implementation(project(":blockball-bukkit-plugin:blockball-bukkit-nms-116R2"))
 
-    implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:0.0.2")
+    implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:0.0.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9")
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.3.72")
 

@@ -6,12 +6,14 @@ import com.github.shynixn.blockball.api.bukkit.event.GameJoinEvent
 import com.github.shynixn.blockball.api.business.enumeration.Team
 import com.github.shynixn.blockball.api.business.service.StatsCacheService
 import com.github.shynixn.blockball.bukkit.BlockBallPlugin
+import com.github.shynixn.blockball.core.logic.persistence.entity.PositionEntity
 import com.google.inject.Inject
 import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.AsyncPlayerChatEvent
 import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.plugin.java.JavaPlugin
 
 /**
  * Handles stats management.
@@ -42,6 +44,8 @@ class StatsListener @Inject constructor(
     suspend fun onPlayerChatEvent(event: AsyncPlayerChatEvent) {
         println("CHAT" + Bukkit.isPrimaryThread())
         statsService.getStatsFromPlayer(event.player)
+
+        JavaPlugin.getPlugin(BlockBallPlugin::class.java).slime!!.motion = PositionEntity(20.0, 0.0, 0.0)
     }
 
     /**
