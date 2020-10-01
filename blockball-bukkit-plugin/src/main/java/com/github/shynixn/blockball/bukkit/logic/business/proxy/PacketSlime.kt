@@ -17,6 +17,7 @@ import org.bukkit.entity.Pig
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.plugin.java.JavaPlugin
+import org.bukkit.util.BlockIterator
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -27,6 +28,7 @@ class PacketSlime(
 ) {
     private var dead = AtomicBoolean(false)
     private var giant: Boolean = true
+    private var smoothPoints = 10.0
 
     private var playerTracker = AllPlayerTracker(Bukkit.getWorld(position.worldName!!)!!, {
 
@@ -57,6 +59,7 @@ class PacketSlime(
 
 
     var motion: Position = PositionEntity("world", 0.0, 0.0, 0.0)
+    private var currentMotion: PositionEntity? = null
 
 
     fun remove() {
@@ -81,29 +84,134 @@ class PacketSlime(
         playerTracker.dispose()
     }
 
+    var alpha: Double = 0.0
+    var v0: Double = 0.0
+    var startTime = 0.0
+    val gravity: Double = -0.8
+
+    private var bodenWiderstand = 0.08
+
+
+    fun schraegWurf(player: Player) {
+
+
+    }
+
+
     private fun sendVelocity(player: Player) {
         val velocity = this.motion
         val position = this.position
+        println(position.toLocation())
 
         if (velocity.x == 0.0 && velocity.y == 0.0 && velocity.z == 0.0) {
             return
         }
 
-        val newPosition = PositionEntity(
-            this.position.worldName!!,
-            this.position.x + velocity.x,
-            this.position.y + velocity.y,
-            this.position.z + velocity.z
+        if (currentMotion == null) {
+            currentMotion = PositionEntity(velocity.x, velocity.y, velocity.z)
+        }
+
+        if (velocity.x >= 0.0) {
+            currentMotion!!.x -= bodenWiderstand
+
+            if (currentMotion!!.x <= 0.0) {
+                currentMotion!!.x = 0.0
+                return
+            }
+        }
+
+        if (velocity.y <= 0.0) {
+            if (position.toLocation().block.type.isAir) {
+                currentMotion!!.y -= 0.0078
+            }
+
+            if (currentMotion!!.y >= 0.0) {
+                currentMotion!!.x = 0.0
+            }
+        }
+
+        if (velocity.y > 0.0) {
+            if (position.toLocation().block.type.isAir) {
+                currentMotion!!.y -= 0.0078
+            }
+
+            if (currentMotion!!.y >= 0.0) {
+                currentMotion!!.x = 0.0
+            }
+        }
+
+        if (currentMotion!!.x == 0.0 && currentMotion!!.y == 0.0) {
+            currentMotion = null
+            this.motion.x = 0.0
+            this.motion.y = 0.0
+            this.motion.z = 0.0
+            return
+        }
+
+        var newPosition = PositionEntity(
+            position.worldName!!,
+            position.x + currentMotion!!.x,
+            position.y + currentMotion!!.y,
+            position.z + currentMotion!!.z
         )
 
-        val velocityPacket = PacketPlayOutEntityVelocity(entityId, Vec3D(velocity.x, velocity.y, velocity.z))
+        val collisionNewPositino = hasCollided(position, newPosition)
+
+        // Check if collision with wall.
+
+
+        val velocityPacket =
+            PacketPlayOutEntityVelocity(entityId, Vec3D(currentMotion!!.x, currentMotion!!.y, currentMotion!!.z))
         player.sendPacket(JavaPlugin.getPlugin(BlockBallPlugin::class.java), velocityPacket)
 
-        val movePacket = PacketPlayOutEntityMove(entityId, position, newPosition, false).toByteBuffer()
+        val movePacket = PacketPlayOutEntityMove(entityId, position, collisionNewPositino.second, false).toByteBuffer()
         player.sendPacket(JavaPlugin.getPlugin(BlockBallPlugin::class.java), movePacket.first, movePacket.second)
 
-        motion = PositionEntity(this.position.worldName!!, 0.0, 0.0, 0.0)
+        this.position = collisionNewPositino.second!!
+
+        if (collisionNewPositino.first) {
+            println("Collided.")
+            this.currentMotion = null
+            this.motion.x = 0.0
+            this.motion.y = 0.0
+            this.motion.z = 0.0
+        }
     }
+
+    private fun hasCollided(rawSourcePosition: Position, rawTargetPosition: Position): Pair<Boolean, PositionEntity> {
+        val oldIntBlock = PositionEntity(
+            rawSourcePosition.worldName!!,
+            rawSourcePosition.x.toInt().toDouble(),
+            rawSourcePosition.y.toInt().toDouble(),
+            rawSourcePosition.z.toInt().toDouble()
+        )
+
+        val newIntBlock = PositionEntity(
+            rawTargetPosition.worldName!!,
+            rawTargetPosition.x.toInt().toDouble(),
+            rawTargetPosition.y.toInt().toDouble(),
+            rawTargetPosition.z.toInt().toDouble()
+        )
+
+        EntitySnowball
+
+        var direction = oldIntBlock.clone().subtract(newIntBlock)
+        val amountOfApplies = (direction.length() / 0.1).toInt()
+        direction = direction.normalize().multiply(0.1)
+
+        for (i in 0 until amountOfApplies) {
+            oldIntBlock.x += direction.x
+            oldIntBlock.y += direction.y
+            oldIntBlock.z += direction.z
+
+            if (!oldIntBlock.toLocation().block.type.isAir) {
+                return Pair(true, oldIntBlock)
+            }
+        }
+
+        return Pair(false, oldIntBlock)
+    }
+
 
     private fun sendGravity(player: Player) {
         val location = PositionEntity(

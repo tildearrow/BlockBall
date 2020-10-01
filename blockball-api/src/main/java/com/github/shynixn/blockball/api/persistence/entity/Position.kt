@@ -77,6 +77,11 @@ interface Position {
     fun normalize(): Position
 
     /**
+     * Position length.
+     */
+    fun length(): Double
+
+    /**
      * Multiplies the position and returns the same position.
      */
     fun multiply(multiplier: Double): Position

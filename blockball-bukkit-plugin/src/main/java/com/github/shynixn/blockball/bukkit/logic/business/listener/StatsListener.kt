@@ -45,7 +45,7 @@ class StatsListener @Inject constructor(
         println("CHAT" + Bukkit.isPrimaryThread())
         statsService.getStatsFromPlayer(event.player)
 
-        JavaPlugin.getPlugin(BlockBallPlugin::class.java).slime!!.motion = PositionEntity(20.0, 0.0, 0.0)
+        JavaPlugin.getPlugin(BlockBallPlugin::class.java).slime!!.motion = PositionEntity(1.0, 0.0, 0.0)
     }
 
     /**
