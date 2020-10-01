@@ -15,6 +15,7 @@ import com.github.shynixn.blockball.api.persistence.entity.BounceConfiguration
 import com.github.shynixn.blockball.core.logic.business.extension.cast
 import com.github.shynixn.blockball.core.logic.business.extension.sync
 import com.github.shynixn.blockball.core.logic.persistence.entity.ItemEntity
+import net.minecraft.server.v1_16_R2.EntityProjectile
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
@@ -800,6 +801,7 @@ class BallProxyImpl(
         if (angle != null) {
             getDesignArmorstand<ArmorStand>().headPose = angle
         }
+
     }
 
     /**

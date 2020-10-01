@@ -18,11 +18,14 @@ import com.github.shynixn.blockball.bukkit.logic.business.service.ProtocolServic
 import com.github.shynixn.blockball.core.logic.business.commandexecutor.*
 import com.github.shynixn.blockball.core.logic.business.extension.cast
 import com.github.shynixn.mccoroutine.launch
+import com.github.shynixn.mccoroutine.registerPackets
 import com.github.shynixn.mccoroutine.registerSuspendingEvents
 import com.google.inject.Guice
 import com.google.inject.Injector
 import kotlinx.coroutines.runBlocking
 import net.minecraft.server.v1_16_R2.Entity
+import net.minecraft.server.v1_16_R2.PacketPlayInEntityAction
+import net.minecraft.server.v1_16_R2.PacketPlayInUseEntity
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.IOUtils
 import org.bstats.bukkit.Metrics
@@ -228,6 +231,10 @@ class BlockBallPlugin : JavaPlugin(), PluginProxy {
 
 
         protocolService = ProtocolServiceImpl()
+        server.pluginManager.registerPackets(
+            listOf(findClazz("net.minecraft.server.VERSION.PacketPlayInUseEntity")),
+            this
+        )
     }
 
     /**

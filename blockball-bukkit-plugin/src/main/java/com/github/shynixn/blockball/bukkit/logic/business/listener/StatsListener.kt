@@ -7,6 +7,7 @@ import com.github.shynixn.blockball.api.business.enumeration.Team
 import com.github.shynixn.blockball.api.business.service.StatsCacheService
 import com.github.shynixn.blockball.bukkit.BlockBallPlugin
 import com.github.shynixn.blockball.core.logic.persistence.entity.PositionEntity
+import com.github.shynixn.mccoroutine.PlayerPacketEvent
 import com.google.inject.Inject
 import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
@@ -45,7 +46,7 @@ class StatsListener @Inject constructor(
         println("CHAT" + Bukkit.isPrimaryThread())
         statsService.getStatsFromPlayer(event.player)
 
-        JavaPlugin.getPlugin(BlockBallPlugin::class.java).slime!!.motion = PositionEntity(1.0, 0.0, 0.0)
+        JavaPlugin.getPlugin(BlockBallPlugin::class.java).slime!!.motion = PositionEntity(1.0, 0.5, 2.0)
     }
 
     /**
@@ -57,6 +58,11 @@ class StatsListener @Inject constructor(
     suspend fun onPlayerShootGoalEvent(event: GameGoalEvent) {
         val stats = statsService.getStatsFromPlayer(event.player)
         stats.amountOfGoals += 1
+    }
+
+    @EventHandler
+    suspend fun onPacketevent(event: PlayerPacketEvent) {
+        println("Received packet: " + event.packet)
     }
 
     /**
