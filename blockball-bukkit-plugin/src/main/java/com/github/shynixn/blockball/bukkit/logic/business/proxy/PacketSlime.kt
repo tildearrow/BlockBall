@@ -83,13 +83,6 @@ class PacketSlime(
     var startTime = 0.0
     val gravity: Double = 0.3
 
-    private var bodenWiderstand = 0.08
-
-
-    fun schraegWurf(player: Player) {
-
-
-    }
 
 
     private fun sendVelocity(player: Player) {
