@@ -1,7 +1,7 @@
 package com.github.shynixn.blockball.bukkit.logic.business.service
 
-import com.github.shynixn.blockball.api.business.proxy.BallProxy
 import com.github.shynixn.blockball.api.business.service.BallForceFieldService
+import com.github.shynixn.blockball.api.persistence.entity.Ball
 import com.github.shynixn.blockball.api.persistence.entity.Game
 import com.github.shynixn.blockball.bukkit.logic.business.extension.toLocation
 import com.github.shynixn.blockball.bukkit.logic.business.extension.toPosition
@@ -45,7 +45,7 @@ class BallForceFieldServiceImpl : BallForceFieldService {
      * Calculates forcefield interactions and applies correct knockback
      * velocity regarding on the enabled game ball forcefield and the velocity of the ball.
      */
-    override fun calculateForcefieldInteractions(game: Game, ball: BallProxy) {
+    override fun calculateForcefieldInteractions(game: Game, ball: Ball) {
         if (!game.arena.meta.customizingMeta.ballForceField) {
             return
         }

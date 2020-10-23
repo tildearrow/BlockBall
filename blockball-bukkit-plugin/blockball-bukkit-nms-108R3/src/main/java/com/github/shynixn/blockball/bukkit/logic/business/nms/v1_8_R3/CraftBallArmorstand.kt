@@ -1,10 +1,8 @@
 package com.github.shynixn.blockball.bukkit.logic.business.nms.v1_8_R3
 
-import com.github.shynixn.blockball.api.business.proxy.EntityBallProxy
 import net.minecraft.server.v1_8_R3.EntityArmorStand
 import org.bukkit.craftbukkit.v1_8_R3.CraftServer
 import org.bukkit.craftbukkit.v1_8_R3.entity.CraftArmorStand
-import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftEntityEquipment
 import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack
 import org.bukkit.inventory.ItemStack
 

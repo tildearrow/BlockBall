@@ -4,14 +4,13 @@ package com.github.shynixn.blockball.core.logic.business.service
 
 import com.github.shynixn.blockball.api.BlockBallApi
 import com.github.shynixn.blockball.api.business.enumeration.*
-import com.github.shynixn.blockball.api.business.proxy.BallProxy
 import com.github.shynixn.blockball.api.business.service.*
 import com.github.shynixn.blockball.api.persistence.entity.CommandMeta
 import com.github.shynixn.blockball.api.persistence.entity.Game
 import com.github.shynixn.blockball.api.persistence.entity.TeamMeta
 import com.github.shynixn.blockball.core.logic.business.extension.sync
-import com.github.shynixn.blockball.core.logic.persistence.entity.GameEndEventEntity
-import com.github.shynixn.blockball.core.logic.persistence.entity.GameGoalEventEntity
+import com.github.shynixn.blockball.core.logic.persistence.entity.EventGameEndEntity
+import com.github.shynixn.blockball.core.logic.persistence.entity.EventGameGoalEntity
 import com.google.inject.Inject
 
 /**
@@ -68,7 +67,7 @@ class GameSoccerServiceImpl @Inject constructor(
             return
         }
 
-        val ballPosition = proxyService.toPosition(game.ball!!.getLocation<Any>())
+        val ballPosition = game.ball!!.position
 
         if (!game.arena.isLocationInSelection(ballPosition)
             && !game.arena.meta.redTeamMeta.goal.isLocationInSelection(ballPosition)
@@ -79,7 +78,7 @@ class GameSoccerServiceImpl @Inject constructor(
             }
         } else {
             game.ballBumperCounter = 0
-            game.lastBallLocation = proxyService.toLocation(proxyService.toPosition(game.ball!!.getLocation<Any>()))
+            game.lastBallLocation = proxyService.toLocation(game.ball!!.position)
         }
 
         if (game.ingamePlayersStorage.isEmpty()) {
@@ -93,12 +92,12 @@ class GameSoccerServiceImpl @Inject constructor(
 
     private fun rescueBall(game: Game) {
         if (game.lastBallLocation != null) {
-            val ballPosition = proxyService.toPosition(game.ball!!.getLocation<Any>())
+            val ballPosition = game.ball!!.position
             val ballLastPosition = proxyService.toPosition(game.lastBallLocation!!)
 
             val knockBackPosition = ballLastPosition.subtract(ballPosition)
             proxyService.setLocationDirection(proxyService.toLocation<Any>(ballPosition), knockBackPosition)
-            game.ball!!.setVelocity(proxyService.toVector<Any>(knockBackPosition))
+            game.ball!!.setVelocity(proxyService.toVector<Any>())
 
             val direction =
                 game.arena.meta.ballMeta.spawnpoint!!.clone().subtract(ballPosition)
@@ -246,7 +245,7 @@ class GameSoccerServiceImpl @Inject constructor(
             game.lastInteractedEntity = interactionEntity
         }
 
-        val gameGoalEntityEvent = GameGoalEventEntity(interactionEntity, team, game)
+        val gameGoalEntityEvent = EventGameGoalEntity(interactionEntity, team, game)
         eventService.sendEvent(gameGoalEntityEvent)
 
         if (gameGoalEntityEvent.isCancelled) {
@@ -351,7 +350,7 @@ class GameSoccerServiceImpl @Inject constructor(
      * Gets called when the given [game] gets win by the given [team].
      */
     override fun onWin(game: Game, team: Team, teamMeta: TeamMeta) {
-        val event = GameEndEventEntity(team, game)
+        val event = EventGameEndEntity(team, game)
         eventService.sendEvent(event)
 
         val winMessageTitle = teamMeta.winMessageTitle

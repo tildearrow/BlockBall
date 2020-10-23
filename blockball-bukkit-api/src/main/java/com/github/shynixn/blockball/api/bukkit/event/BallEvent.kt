@@ -1,6 +1,7 @@
 package com.github.shynixn.blockball.api.bukkit.event
 
-import com.github.shynixn.blockball.api.business.proxy.BallProxy
+import com.github.shynixn.blockball.api.persistence.entity.Ball
+import org.bukkit.event.Cancellable
 
 /**
  * Created by Shynixn 2018.
@@ -33,4 +34,21 @@ open class BallEvent(
         /**
          * Ball.
          */
-        val ball: BallProxy) : BlockBallEvent()
+        val ball: Ball
+) : BlockBallEvent(), Cancellable{
+        private var cancelled = false
+
+        /**
+         * Sets cancelled.
+         */
+        override fun setCancelled(cancel: Boolean) {
+                this.cancelled = cancel
+        }
+
+        /**
+         * Is cancelled.
+         */
+        override fun isCancelled(): Boolean {
+                return cancelled
+        }
+}

@@ -2,12 +2,8 @@ package com.github.shynixn.blockball.core.logic.persistence.entity
 
 import com.github.shynixn.blockball.api.business.enumeration.GameStatus
 import com.github.shynixn.blockball.api.business.enumeration.Team
-import com.github.shynixn.blockball.api.business.proxy.BallProxy
 import com.github.shynixn.blockball.api.business.proxy.HologramProxy
-import com.github.shynixn.blockball.api.persistence.entity.Arena
-import com.github.shynixn.blockball.api.persistence.entity.Game
-import com.github.shynixn.blockball.api.persistence.entity.GameStorage
-import com.github.shynixn.blockball.api.persistence.entity.Position
+import com.github.shynixn.blockball.api.persistence.entity.*
 
 /**
  * Created by Shynixn 2018.
@@ -74,7 +70,7 @@ open class GameEntity(
     /**
      * Ball.
      */
-    override var ball: BallProxy? = null
+    override var ball: Ball? = null
     /**
      * Last location of the ball.
      */
@@ -124,7 +120,7 @@ open class GameEntity(
     override var lastInteractedEntity: Any? = null
 
     /**
-     * Storag.
+     * Storage.
      */
     override val ingamePlayersStorage: MutableMap<Any, GameStorage> = HashMap()
     /**

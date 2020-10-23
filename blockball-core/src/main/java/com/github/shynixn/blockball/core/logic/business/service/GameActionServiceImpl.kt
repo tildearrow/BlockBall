@@ -8,8 +8,8 @@ import com.github.shynixn.blockball.api.business.proxy.HologramProxy
 import com.github.shynixn.blockball.api.business.proxy.PluginProxy
 import com.github.shynixn.blockball.api.business.service.*
 import com.github.shynixn.blockball.api.persistence.entity.*
-import com.github.shynixn.blockball.core.logic.persistence.entity.GameJoinEventEntity
-import com.github.shynixn.blockball.core.logic.persistence.entity.GameLeaveEventEntity
+import com.github.shynixn.blockball.core.logic.persistence.entity.EventGameJoinEntity
+import com.github.shynixn.blockball.core.logic.persistence.entity.EventGameLeaveEntity
 import com.google.inject.Inject
 
 /**
@@ -79,7 +79,7 @@ class GameActionServiceImpl @Inject constructor(
             this.leaveGame(g, player)
         }
 
-        val event = GameJoinEventEntity(player, game)
+        val event = EventGameJoinEntity(player, game)
         eventService.sendEvent(event)
 
         if (event.isCancelled) {
@@ -102,7 +102,7 @@ class GameActionServiceImpl @Inject constructor(
      */
     override fun <P> leaveGame(game: Game, player: P) {
         require(player is Any)
-        val event = GameLeaveEventEntity(player, game)
+        val event = EventGameLeaveEntity(player, game)
         eventService.sendEvent(event)
 
         if (event.isCancelled) {

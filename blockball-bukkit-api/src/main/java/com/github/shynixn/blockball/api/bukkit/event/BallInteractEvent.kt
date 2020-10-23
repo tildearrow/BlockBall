@@ -1,6 +1,6 @@
 package com.github.shynixn.blockball.api.bukkit.event
 
-import com.github.shynixn.blockball.api.business.proxy.BallProxy
+import com.github.shynixn.blockball.api.persistence.entity.Ball
 import org.bukkit.entity.Entity
 
 /**
@@ -34,4 +34,5 @@ open class BallInteractEvent(
         /**
          * Entity interacting with.
          */
-        val entity: Entity, ball: BallProxy) : BallCancelableEvent(ball)
+        val entity: Entity, ball: Ball
+) : BallEvent(ball)

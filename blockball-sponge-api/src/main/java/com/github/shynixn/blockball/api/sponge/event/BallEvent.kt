@@ -1,7 +1,5 @@
 package com.github.shynixn.blockball.api.sponge.event
 
-import com.github.shynixn.blockball.api.business.proxy.BallProxy
-
 /**
  * Created by Shynixn 2018.
  * <p>

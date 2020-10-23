@@ -1,6 +1,6 @@
 package com.github.shynixn.blockball.api.bukkit.event
 
-import com.github.shynixn.blockball.api.business.proxy.BallProxy
+import com.github.shynixn.blockball.api.persistence.entity.Ball
 import org.bukkit.entity.Entity
 import org.bukkit.util.Vector
 
@@ -38,6 +38,6 @@ class BallKickEvent(
          */
         val resultVelocity: Vector,
         entity: Entity,
-        ball: BallProxy
+        ball: Ball
 
 ) : BallInteractEvent(entity, ball)

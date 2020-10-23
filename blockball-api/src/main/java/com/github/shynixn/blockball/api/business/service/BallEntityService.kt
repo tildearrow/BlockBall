@@ -1,8 +1,7 @@
 package com.github.shynixn.blockball.api.business.service
 
-import com.github.shynixn.blockball.api.business.proxy.BallProxy
+import com.github.shynixn.blockball.api.persistence.entity.Ball
 import com.github.shynixn.blockball.api.persistence.entity.BallMeta
-import java.util.*
 
 /**
  * Created by Shynixn 2018.
@@ -33,28 +32,27 @@ import java.util.*
  */
 interface BallEntityService {
     /**
-     * Spawns a temporary ball.
+     * Spawns a temporary ball. Temporary means that the ball gets
+     * cleaned up once a server reload or restart happens.
+     * @param location is the spawn point location of the ball.
+     * @param BallMeta defines the initial Ball Meta data.
      */
-    fun <L> spawnTemporaryBall(location: L, meta: BallMeta): BallProxy
+    fun <L> spawnTemporaryBall(location: L, meta: BallMeta): Ball
 
     /**
-     * Registers entities on the server when not already registered.
-     * Returns true if registered. Returns false when not registered.
+     * Finds Ball from the given entity id.
      */
-    fun registerEntitiesOnServer(): Boolean
+    fun <E> findBallFromEntityId(entityId : Int): Ball?
 
     /**
-     * Finds Ball from the given entity.
+     * Disposes a single ball.
+     * Is automatically handled and should not be necessary to call.
      */
-    fun <E> findBallFromEntity(entity: E): Optional<BallProxy>
+    fun disposeBall(ball: Ball)
 
     /**
-     * Checks the entity collection for invalid ball entities and removes them.
+     * Clears pending ball caches and sends a destroy packet to each
+     * client watching any balls.
      */
-    fun <E> cleanUpInvalidEntities(entities: Collection<E>)
-
-    /**
-     * Returns all balls managed by the plugin.
-     */
-    fun getAllBalls(): List<BallProxy>
+    fun dispose()
 }

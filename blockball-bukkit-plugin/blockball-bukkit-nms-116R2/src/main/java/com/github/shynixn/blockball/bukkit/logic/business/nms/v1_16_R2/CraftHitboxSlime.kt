@@ -1,6 +1,5 @@
 package com.github.shynixn.blockball.bukkit.logic.business.nms.v1_16_R2
 
-import com.github.shynixn.blockball.api.business.proxy.EntityBallProxy
 import net.minecraft.server.v1_16_R2.EntitySlime
 import org.bukkit.craftbukkit.v1_16_R2.CraftServer
 import org.bukkit.craftbukkit.v1_16_R2.entity.CraftSlime

@@ -2,8 +2,6 @@
 
 package com.github.shynixn.blockball.bukkit.logic.business.nms.v1_9_R2
 
-import com.github.shynixn.blockball.api.business.proxy.BallProxy
-import com.github.shynixn.blockball.api.business.proxy.NMSBallProxy
 import com.github.shynixn.blockball.api.persistence.entity.BallMeta
 import net.minecraft.server.v1_9_R2.EntityArmorStand
 import net.minecraft.server.v1_9_R2.EnumItemSlot

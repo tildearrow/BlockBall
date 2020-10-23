@@ -146,6 +146,15 @@ class PositionEntity() : Position {
     /**
      * Optional constructor.
      */
+    constructor(x : Int, y : Int, z : Int) : this(){
+        this.x = x.toDouble()
+        this.y = y.toDouble()
+        this.z = z.toDouble()
+    }
+
+    /**
+     * Optional constructor.
+     */
     constructor(worldName: String, x: Double, y: Double, z: Double) : this(x, y, z) {
         this.worldName = worldName
     }

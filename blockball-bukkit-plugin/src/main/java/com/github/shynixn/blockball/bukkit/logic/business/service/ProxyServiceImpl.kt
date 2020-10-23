@@ -10,6 +10,7 @@ import com.github.shynixn.blockball.api.business.service.ProxyService
 import com.github.shynixn.blockball.api.persistence.entity.ChatBuilder
 import com.github.shynixn.blockball.api.persistence.entity.Item
 import com.github.shynixn.blockball.api.persistence.entity.Position
+import com.github.shynixn.blockball.api.persistence.entity.RaytraceResult
 import com.github.shynixn.blockball.bukkit.logic.business.extension.*
 import com.google.inject.Inject
 import org.bukkit.Bukkit
@@ -24,6 +25,7 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.Plugin
 import org.bukkit.scoreboard.Scoreboard
 import java.util.*
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.logging.Level
 import java.util.stream.Stream
 import kotlin.collections.ArrayList
@@ -61,6 +63,7 @@ class ProxyServiceImpl @Inject constructor(
     private val packageService: PackageService,
     private val itemTypeService: ItemTypeService
 ) : ProxyService {
+
 
     /**
      * Gets the name of the World the player is in.
@@ -616,5 +619,39 @@ class ProxyServiceImpl @Inject constructor(
 
         sign.update(true)
         return true
+    }
+
+    /**
+     * Gets a list of players which can see the given location.
+     */
+    override fun <P, L> getPlayersInRenderDistance(location: L): List<P> {
+        require(location is Location)
+        val renderDistance = 32 * 32
+        val players = ArrayList<Player>()
+
+        for(player in location.world!!.players){
+            if(player.location.distanceSquared(location) < renderDistance){
+                players.add(player)
+            }
+        }
+
+        return players as List<P>
+    }
+
+    /**
+     * Ray traces in the world for the given motion.
+     */
+    override fun rayTraceMotion(position: Position, motion: Position): RaytraceResult {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    /**
+     * Creates a new entity id.
+     */
+    override fun createNewEntityId(): Int {
+        val atomicInteger = findClazz("net.minecraft.server.VERSION.Entity")
+            .getDeclaredField("entityCount")
+            .get(null) as AtomicInteger
+        return atomicInteger.incrementAndGet()
     }
 }

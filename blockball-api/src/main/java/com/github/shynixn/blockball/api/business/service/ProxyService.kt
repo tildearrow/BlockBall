@@ -3,6 +3,7 @@ package com.github.shynixn.blockball.api.business.service
 import com.github.shynixn.blockball.api.business.enumeration.GameMode
 import com.github.shynixn.blockball.api.persistence.entity.ChatBuilder
 import com.github.shynixn.blockball.api.persistence.entity.Position
+import com.github.shynixn.blockball.api.persistence.entity.RaytraceResult
 import java.util.stream.Stream
 
 /**
@@ -294,8 +295,23 @@ interface ProxyService {
     fun <L> setBlockType(location: L, hint: Any)
 
     /**
+     * Gets a list of players which can see the given location.
+     */
+    fun <P, L> getPlayersInRenderDistance(location : L) : List<P>
+
+    /**
+     * Ray traces in the world for the given motion.
+     */
+    fun rayTraceMotion(position: Position, motion : Position) : RaytraceResult
+
+    /**
      * Sets the sign lines at the given location.
      * Return true if the block is valid sign with changed lines.
      */
     fun <L> setSignLines(location: L, lines: List<String>): Boolean
+
+    /**
+     * Creates a new entity id.
+     */
+    fun createNewEntityId() : Int
 }

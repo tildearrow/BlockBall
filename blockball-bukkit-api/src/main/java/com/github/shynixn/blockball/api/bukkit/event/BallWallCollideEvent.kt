@@ -1,6 +1,6 @@
 package com.github.shynixn.blockball.api.bukkit.event
 
-import com.github.shynixn.blockball.api.business.proxy.BallProxy
+import com.github.shynixn.blockball.api.persistence.entity.Ball
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.util.Vector
@@ -48,4 +48,5 @@ class BallWallCollideEvent(
         /**
          * Calculated outgoing Vector.
          */
-        val outgoingVector: Vector, ball: BallProxy) : BallCancelableEvent(ball)
+        val outgoingVector: Vector, ball: Ball
+) : BallEvent(ball)

@@ -1,7 +1,6 @@
 package com.github.shynixn.blockball.api.sponge.event
 
 import com.flowpowered.math.vector.Vector3d
-import com.github.shynixn.blockball.api.business.proxy.BallProxy
 import org.spongepowered.api.block.BlockState
 import org.spongepowered.api.util.Direction
 

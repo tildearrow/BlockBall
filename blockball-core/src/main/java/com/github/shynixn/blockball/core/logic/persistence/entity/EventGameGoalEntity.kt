@@ -3,7 +3,7 @@ package com.github.shynixn.blockball.core.logic.persistence.entity
 import com.github.shynixn.blockball.api.business.enumeration.Team
 import com.github.shynixn.blockball.api.persistence.entity.Game
 
-class GameGoalEventEntity(
+class EventGameGoalEntity(
     /**
      *  Player last touching the ball. Can be null in very rare cases, mostly when entities interact with the ball.
      */
@@ -11,5 +11,5 @@ class GameGoalEventEntity(
     /**
      * Team scoring the goal.
      */
-    val team: Team, val game: Game
-) : GameCancelableEventEntity()
+    val team: Team, game: Game
+) : EventGameEntity(game)

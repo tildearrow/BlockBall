@@ -1,6 +1,6 @@
 package com.github.shynixn.blockball.api.business.service
 
-import com.github.shynixn.blockball.api.business.proxy.BallProxy
+import com.github.shynixn.blockball.api.persistence.entity.Ball
 import com.github.shynixn.blockball.api.persistence.entity.Game
 
 /**
@@ -35,5 +35,5 @@ interface BallForceFieldService {
      * Calculates forcefield interactions and applies correct knockback
      * velocity regarding on the enabled game ball forcefield and the velocity of the ball.
      */
-    fun calculateForcefieldInteractions(game: Game, ball: BallProxy)
+    fun calculateForcefieldInteractions(game: Game, ball: Ball)
 }

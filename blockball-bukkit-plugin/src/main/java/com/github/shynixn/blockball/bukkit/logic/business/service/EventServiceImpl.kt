@@ -13,16 +13,19 @@ class EventServiceImpl : EventService {
      */
     override fun sendEvent(event: Any) {
         val internalEvent: Event = when (event) {
-            is GameEndEventEntity -> {
+            is EventGameEndEntity -> {
                 GameEndEvent(event.winningTeam, event.game)
             }
-            is GameJoinEventEntity -> {
+            is EventGameJoinEntity -> {
                 GameJoinEvent(event.player as Player, event.game)
             }
-            is GameLeaveEventEntity -> {
+            is EventGameLeaveEntity -> {
                 GameLeaveEvent(event.player as Player, event.game)
             }
-            is GameGoalEventEntity -> GameGoalEvent(event.player as Player?, event.team, event.game)
+            is EventGameGoalEntity -> GameGoalEvent(event.player as Player?, event.team, event.game)
+            is EventBallRemove -> {
+                BallDeathEvent(event.ball)
+            }
             else -> {
                 throw IllegalArgumentException("This event type $event does not exist!")
             }
@@ -33,6 +36,11 @@ class EventServiceImpl : EventService {
         if (event is GameCancelableEventEntity) {
             require(internalEvent is GameCancelableEvent)
             event.isCancelled = internalEvent.isCancelled
+        }
+
+        if(event is EventCancellable){
+            require(internalEvent is BallCancelableEvent)
+            event.cancelled = internalEvent.isCancelled
         }
     }
 }

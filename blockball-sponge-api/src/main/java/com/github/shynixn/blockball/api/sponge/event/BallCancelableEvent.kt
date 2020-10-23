@@ -1,6 +1,5 @@
 package com.github.shynixn.blockball.api.sponge.event
 
-import com.github.shynixn.blockball.api.business.proxy.BallProxy
 import org.spongepowered.api.event.Cancellable
 
 /**

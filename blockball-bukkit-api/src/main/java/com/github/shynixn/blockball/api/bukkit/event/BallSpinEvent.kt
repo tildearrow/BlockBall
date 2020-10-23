@@ -1,6 +1,6 @@
 package com.github.shynixn.blockball.api.bukkit.event
 
-import com.github.shynixn.blockball.api.business.proxy.BallProxy
+import com.github.shynixn.blockball.api.persistence.entity.Ball
 
 /**
  * Created by Shynixn 2018.
@@ -33,8 +33,8 @@ class BallSpinEvent(
         /**
          * Spinning force.
          */
-        val angularVelocity: Double, ball: BallProxy,
+        val angularVelocity: Double, ball: Ball,
         /**
          * Is this spin the initial spin where all sub spins get calculated from?
          */
-        val firstSpin: Boolean) : BallCancelableEvent(ball)
+        val firstSpin: Boolean) : BallEvent(ball)
