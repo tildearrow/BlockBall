@@ -5,12 +5,15 @@ package com.github.shynixn.blockball.bukkit.logic.business.service
 import com.github.shynixn.blockball.api.business.enumeration.Version
 import com.github.shynixn.blockball.api.business.proxy.PluginProxy
 import com.github.shynixn.blockball.api.business.service.ItemTypeService
-import com.github.shynixn.blockball.api.business.service.PackageService
 import com.github.shynixn.blockball.api.business.service.ProxyService
 import com.github.shynixn.blockball.api.persistence.entity.ChatBuilder
 import com.github.shynixn.blockball.api.persistence.entity.Item
 import com.github.shynixn.blockball.api.persistence.entity.Position
-import com.github.shynixn.blockball.bukkit.logic.business.extension.*
+import com.github.shynixn.blockball.bukkit.logic.business.extension.findClazz
+import com.github.shynixn.blockball.bukkit.logic.business.extension.toLocation
+import com.github.shynixn.blockball.bukkit.logic.business.extension.toPosition
+import com.github.shynixn.blockball.bukkit.logic.business.extension.toVector
+import com.github.shynixn.blockball.core.logic.business.extension.accessible
 import com.google.inject.Inject
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
@@ -23,7 +26,9 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.Plugin
 import org.bukkit.scoreboard.Scoreboard
+import org.bukkit.util.Vector
 import java.util.*
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.logging.Level
 import java.util.stream.Stream
 import kotlin.collections.ArrayList
@@ -58,7 +63,6 @@ import kotlin.streams.asStream
  */
 class ProxyServiceImpl @Inject constructor(
     private val pluginProxy: PluginProxy,
-    private val packageService: PackageService,
     private val itemTypeService: ItemTypeService
 ) : ProxyService {
 
@@ -166,6 +170,14 @@ class ProxyServiceImpl @Inject constructor(
     }
 
     /**
+     * Is player online.
+     */
+    override fun <P> isPlayerOnline(player: P): Boolean {
+        require(player is Player)
+        return player.isOnline
+    }
+
+    /**
      * Performs a player command.
      */
     override fun <P> performPlayerCommand(player: P, command: String) {
@@ -211,6 +223,14 @@ class ProxyServiceImpl @Inject constructor(
     override fun <L, P> getEntityLocation(entity: P): L {
         require(entity is Entity)
         return entity.location as L
+    }
+
+    /**
+     * Gets the player eye location.
+     */
+    override fun <P, L> getPlayerEyeLocation(player: P): L {
+        require(player is Player)
+        return player.eyeLocation.clone() as L
     }
 
     /**
@@ -331,6 +351,14 @@ class ProxyServiceImpl @Inject constructor(
     }
 
     /**
+     * Gets the location direction.
+     */
+    override fun <L> getLocationDirection(location: L): Position {
+        require(location is Location)
+        return location.direction.toPosition()
+    }
+
+    /**
      * Gets the player scoreboard.
      */
     override fun <P, S> getPlayerScoreboard(player: P): S {
@@ -427,11 +455,15 @@ class ProxyServiceImpl @Inject constructor(
      * Converts the given [location] to a [Position].
      */
     override fun <L> toPosition(location: L): Position {
-        if (location !is Location) {
-            throw IllegalArgumentException("Location has to be a BukkitLocation!")
+        if (location is Location) {
+            return location.toPosition()
         }
 
-        return location.toPosition()
+        if (location is Vector) {
+            return location.toPosition()
+        }
+
+        throw IllegalArgumentException("Location is not a BukkitLocation or BukkitVector!")
     }
 
     /**
@@ -541,7 +573,7 @@ class ProxyServiceImpl @Inject constructor(
                 }
             }
 
-            packageService.sendPacket(sender, packet)
+            sendPacket(sender, packet)
         } catch (e: Exception) {
             Bukkit.getLogger().log(Level.WARNING, "Failed to send packet.", e)
         }
@@ -616,5 +648,44 @@ class ProxyServiceImpl @Inject constructor(
 
         sign.update(true)
         return true
+    }
+
+    /**
+     * Creates a new entity id.
+     */
+    override fun createNewEntityId(): Int {
+        return if (pluginProxy.getServerVersion().isVersionSameOrGreaterThan(Version.VERSION_1_14_R1)) {
+            val atomicInteger = findClazz("net.minecraft.server.VERSION.Entity")
+                .getDeclaredField("entityCount")
+                .accessible(true)
+                .get(null) as AtomicInteger
+            atomicInteger.incrementAndGet()
+        } else {
+            val entityCountField = findClazz("net.minecraft.server.VERSION.Entity")
+                .getDeclaredField("entityCount")
+                .accessible(true)
+            val intNumber = (entityCountField.get(null) as Int) + 1
+            entityCountField.set(null, intNumber)
+            intNumber
+        }
+    }
+
+    /**
+     * Sends the given [packet] to the given [player].
+     */
+    override fun <P> sendPacket(player: P, packet: Any) {
+        val craftPlayerClazz = findClazz("org.bukkit.craftbukkit.VERSION.entity.CraftPlayer")
+        val getHandleMethod = craftPlayerClazz.getDeclaredMethod("getHandle")
+        val nmsPlayer = getHandleMethod.invoke(player)
+
+        val nmsPlayerClazz = findClazz("net.minecraft.server.VERSION.EntityPlayer")
+        val playerConnectionField = nmsPlayerClazz.getDeclaredField("playerConnection")
+        playerConnectionField.isAccessible = true
+        val connection = playerConnectionField.get(nmsPlayer)
+
+        val playerConnectionClazz = findClazz("net.minecraft.server.VERSION.PlayerConnection")
+        val packetClazz = findClazz("net.minecraft.server.VERSION.Packet")
+        val sendPacketMethod = playerConnectionClazz.getDeclaredMethod("sendPacket", packetClazz)
+        sendPacketMethod.invoke(connection, packet)
     }
 }

@@ -9,14 +9,14 @@ import com.github.shynixn.blockball.api.business.enumeration.Version
 import com.github.shynixn.blockball.api.business.proxy.PluginProxy
 import com.github.shynixn.blockball.api.business.service.*
 import com.github.shynixn.blockball.api.persistence.context.SqlDbContext
-import com.github.shynixn.blockball.core.logic.business.extension.translateChatColors
-import com.github.shynixn.blockball.bukkit.logic.business.extension.findClazz
 import com.github.shynixn.blockball.bukkit.logic.business.listener.*
 import com.github.shynixn.blockball.core.logic.business.commandexecutor.*
 import com.github.shynixn.blockball.core.logic.business.extension.cast
+import com.github.shynixn.blockball.core.logic.business.extension.translateChatColors
+import com.github.shynixn.mccoroutine.registerSuspendingEvents
 import com.google.inject.Guice
 import com.google.inject.Injector
-import org.apache.commons.io.FileUtils
+import kotlinx.coroutines.runBlocking
 import org.apache.commons.io.IOUtils
 import org.bstats.bukkit.Metrics
 import org.bukkit.Bukkit
@@ -25,8 +25,6 @@ import org.bukkit.configuration.MemorySection
 import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 import java.io.FileOutputStream
-import java.nio.file.Files
-import java.nio.file.Paths
 import java.util.logging.Level
 
 /**
@@ -121,16 +119,6 @@ class BlockBallPlugin : JavaPlugin(), PluginProxy {
             return
         }
 
-        if (hasArmorstandTickingChanged()) {
-            sendConsoleMessage(ChatColor.YELLOW.toString() + "================================================")
-            sendConsoleMessage(ChatColor.YELLOW.toString() + "BlockBall has automatically changed your paper.yml file.")
-            sendConsoleMessage(ChatColor.YELLOW.toString() + "The setting armor-stand-tick: true has changed.")
-            sendConsoleMessage(ChatColor.YELLOW.toString() + "Please restart the server.")
-            sendConsoleMessage(ChatColor.YELLOW.toString() + "================================================")
-            Bukkit.getServer().shutdown()
-            return
-        }
-
         this.injector = Guice.createInjector(BlockBallDependencyInjectionBinder(this))
         this.reloadConfig()
 
@@ -140,7 +128,7 @@ class BlockBallPlugin : JavaPlugin(), PluginProxy {
         Bukkit.getPluginManager().registerEvents(resolve(HubgameListener::class.java), this)
         Bukkit.getPluginManager().registerEvents(resolve(MinigameListener::class.java), this)
         Bukkit.getPluginManager().registerEvents(resolve(BungeeCordgameListener::class.java), this)
-        Bukkit.getPluginManager().registerEvents(resolve(StatsListener::class.java), this)
+        Bukkit.getPluginManager().registerSuspendingEvents(resolve(StatsListener::class.java), this)
         Bukkit.getPluginManager().registerEvents(resolve(BallListener::class.java), this)
         Bukkit.getPluginManager().registerEvents(resolve(BlockSelectionListener::class.java), this)
 
@@ -151,10 +139,8 @@ class BlockBallPlugin : JavaPlugin(), PluginProxy {
         val updateCheckService = resolve(UpdateCheckService::class.java)
         val dependencyService = resolve(DependencyService::class.java)
         val configurationService = resolve(ConfigurationService::class.java)
-        val ballEntityService = resolve(BallEntityService::class.java)
         val bungeeCordConnectionService = resolve(BungeeCordConnectionService::class.java)
 
-        ballEntityService.registerEntitiesOnServer()
         updateCheckService.checkForUpdates()
         dependencyService.checkForInstalledDependencies()
 
@@ -198,9 +184,14 @@ class BlockBallPlugin : JavaPlugin(), PluginProxy {
                 .consoleSender.sendMessage(PREFIX_CONSOLE + ChatColor.DARK_GREEN + "Started server linking.")
         }
 
+        val protocolService = resolve(ProtocolService::class.java)
+
         for (world in Bukkit.getWorlds()) {
-            ballEntityService.cleanUpInvalidEntities(world.entities)
+            for (player in world.players) {
+                protocolService.register(player)
+            }
         }
+        protocolService.registerPackets(listOf(findClazz("net.minecraft.server.VERSION.PacketPlayInUseEntity")))
 
         Bukkit.getServer()
             .consoleSender.sendMessage(PREFIX_CONSOLE + ChatColor.GREEN + "Enabled BlockBall " + this.description.version + " by Shynixn, LazoYoung")
@@ -214,12 +205,15 @@ class BlockBallPlugin : JavaPlugin(), PluginProxy {
             return
         }
 
-        resolve(PersistenceStatsService::class.java).close()
+        runBlocking {
+            resolve(PersistenceStatsService::class.java).close()
+        }
+
         resolve(SqlDbContext::class.java).close()
+        resolve(ProtocolService::class.java).dispose()
 
         try {
             resolve(GameService::class.java).close()
-            resolve(EntityRegistrationService::class.java).clearResources()
         } catch (e: Exception) {
             // Ignored.
         }
@@ -320,6 +314,18 @@ class BlockBallPlugin : JavaPlugin(), PluginProxy {
     }
 
     /**
+     * Tries to find a version compatible class.
+     */
+    override fun findClazz(name: String): Class<*> {
+        return Class.forName(
+            name.replace(
+                "VERSION",
+                BlockBallApi.resolve(PluginProxy::class.java).getServerVersion().bukkitId
+            )
+        )
+    }
+
+    /**
      * Sends a console message from this plugin.
      */
     override fun sendConsoleMessage(message: String) {
@@ -368,34 +374,6 @@ class BlockBallPlugin : JavaPlugin(), PluginProxy {
             sendConsoleMessage(ChatColor.RED.toString() + "Plugin gets now disabled!")
             sendConsoleMessage(ChatColor.RED.toString() + "================================================")
             Bukkit.getPluginManager().disablePlugin(this)
-            return true
-        }
-
-        return false
-    }
-
-    /**
-     * Checks if armorStand ticking is disabled when PaperSpigot is being used.
-     */
-    private fun hasArmorstandTickingChanged(): Boolean {
-        if (config.getBoolean("global-configuration.ignore-ticking-settings")) {
-            return false
-        }
-
-        val path = Paths.get("paper.yml")
-
-        if (!Files.exists(path)) {
-            return false
-        }
-
-        val text = FileUtils.readFileToString(path.toFile(), "UTF-8")
-
-        if (text.contains("armor-stands-tick: false")) {
-            FileUtils.writeStringToFile(
-                path.toFile(),
-                text.replace("armor-stands-tick: false", "armor-stands-tick: true"),
-                "UTF-8"
-            )
             return true
         }
 

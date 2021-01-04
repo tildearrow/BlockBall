@@ -85,8 +85,8 @@ class GameMiniGameActionServiceImpl @Inject constructor(
                     )
                 )
                 .setClickAction(
-                    ChatClickAction.RUN_COMMAND
-                    , "/" + configurationService.findValue<String>("global-spectate.command") + " " + game.arena.name
+                    ChatClickAction.RUN_COMMAND,
+                    "/" + configurationService.findValue<String>("global-spectate.command") + " " + game.arena.name
                 )
                 .setHoverText(" ")
                 .builder()
@@ -132,6 +132,7 @@ class GameMiniGameActionServiceImpl @Inject constructor(
 
         val storage = this.createPlayerStorage(game, player)
         game.ingamePlayersStorage[player] = storage
+        proxyService.teleport(player, game.arena.meta.minigameMeta.lobbySpawnpoint!!)
 
         if (team != null) {
             joinGame(game, player, team)
@@ -177,15 +178,16 @@ class GameMiniGameActionServiceImpl @Inject constructor(
             return
         }
 
+        val storage = createPlayerStorage(game, player)
+        game.spectatorPlayersStorage[player] = storage
+        proxyService.setGameMode(player, GameMode.SPECTATOR)
+        proxyService.setPlayerFlying(player, true)
+
         if (game.arena.meta.spectatorMeta.spectateSpawnpoint != null) {
             proxyService.teleport(player, game.arena.meta.spectatorMeta.spectateSpawnpoint!!)
         } else {
             proxyService.teleport(player, game.arena.meta.ballMeta.spawnpoint!!)
         }
-
-        val storage = createPlayerStorage(game, player)
-        game.spectatorPlayersStorage[player] = storage
-        proxyService.setGameMode(player, GameMode.SPECTATOR)
     }
 
     /**
@@ -415,7 +417,6 @@ class GameMiniGameActionServiceImpl @Inject constructor(
             proxyService.setInventoryContents(player, arrayOfNulls<Any?>(36), arrayOfNulls<Any?>(4))
         }
 
-        proxyService.teleport(player, game.arena.meta.minigameMeta.lobbySpawnpoint!!)
         return stats
     }
 
