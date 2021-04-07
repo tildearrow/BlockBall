@@ -66,7 +66,7 @@ dependencies {
     implementation("com.google.code.gson:gson:2.8.6")
 
     compileOnly("me.clip:placeholderapi:2.9.2")
-    compileOnly("net.milkbowlvault:VaultAPI:1.7")
+    compileOnly("net.milkbowl.vault:VaultAPI:1.7")
     compileOnly("org.spigotmc:spigot116R3:1.16.4-R3.0")
 
     testCompile("org.xerial:sqlite-jdbc:3.23.1")

@@ -268,7 +268,7 @@ task downloadDependencies(type: Exec) {
     }
 
     def text = "cd build/buildtools"
-    text += " && mvn install:install-file -Dfile=Vault.jar -DgroupId=net.milkbowlvault -DartifactId=VaultAPI -Dversion=1.7 -Dpackaging=jar"
+    //text += " && mvn install:install-file -Dfile=Vault.jar -DgroupId=net.milkbowlvault -DartifactId=VaultAPI -Dversion=1.7 -Dpackaging=jar"
     text += " && java -jar BuildTools.jar --rev 1.16.4"
     text += " && mvn install:install-file -Dfile=spigot-1.16.4.jar -DgroupId=org.spigotmc -DartifactId=spigot116R3 -Dversion=1.16.4-R3.0 -Dpackaging=jar"
 
